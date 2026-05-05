@@ -1,0 +1,39 @@
+
+
+
+
+.top{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.middle{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.bottom{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 100px;
+}
+
+.flashCard{
+    background-color: beige;
+    height: 300px;
+    width: 900px;
+}
+
+button{
+
+    height: 50px;
+    width: 100px;
+}
