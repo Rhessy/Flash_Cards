@@ -54,7 +54,7 @@ function render() {
 
     // 3. Update text based on flip state
     flashCard.textContent = state.isFlipped ? currentCard.back : currentCard.front;
-    console.log(state.flashCards[0]);
+    debugState();
 
     // Toggle a CSS class for the animation
     //cardEl.classList.toggle('flipped', state.isFlipped);
@@ -72,6 +72,22 @@ flipBtn.addEventListener('click', () => {
     state.isFlipped = !state.isFlipped;
     render();
 });
+
+
+//Adding in a Degbug function to check if the data is being fetched correctly
+
+const DEBUG_MODE = true; // Turn this to false when you're done!
+
+function debugState(action) {
+    if (!DEBUG_MODE) return;
+
+    console.group(`%cDebug: ${action}`, "color: #007bff; font-weight: bold;");
+    console.log("Current Index:", state.currentIndex);
+    console.log("Is Flipped:", state.isFlipped);
+    console.log("Total Cards:", state.flashCards.length);
+    console.log("Full State Object:", { ...state }); // The { ... } creates a snapshot
+    console.groupEnd();
+}
 
 // Execute the function
 fetchJsonData();
