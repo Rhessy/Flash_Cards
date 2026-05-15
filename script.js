@@ -1,12 +1,9 @@
-//import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-//import { initializeApp } from "firebase/app";
-//import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-//import { initializeApp } from "firebase/app";
-
-// 1. Get the initialization tool from the "app" link
+/**
+ * SECTION 1: DATABASE SDK IMPORTS
+ * We import specific modules from the Firebase CDN. 
+ * 'initializeApp' starts the connection, while 'firestore' modules handle the data.
+ */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-
-// 2. Get the database tools from the "firestore" link
 import {
     getFirestore,
     collection,
@@ -14,11 +11,11 @@ import {
     addDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// ... your config and initialization code
+/**
+ * SECTION 2: CONFIGURATION
+ * Credentials used to authenticate your web app with your specific Firebase Project.
+ */
 const firebaseConfig = {
-    // Copy this from Project Settings > General > Your Apps
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-
     apiKey: "AIzaSyBCNMm6ACaTtIEaPojz0bWJMaTGLlVcxYg",
     authDomain: "fashycards.firebaseapp.com",
     projectId: "fashycards",
@@ -28,116 +25,129 @@ const firebaseConfig = {
     measurementId: "G-C9ZYF15071"
 };
 
+// Initialize Firebase and Database Service
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app); // This 'db' instance is what you'll use for all calls
+const db = getFirestore(app);
 
-//Initialize variables 
-
-
-
-//set the front of the flash card to be equal to the current flash card object 
-const flashCard = document.querySelector(".flashCard .content");
-const nextBtn = document.querySelector('.next-btn');
-const flipBtn = document.querySelector('.flip-btn');
-//function for getting the current set of flashCards fron the 'cards.json' file
-
-//
+/**
+ * SECTION 3: APPLICATION STATE (The Brain)
+ * State-driven architecture: This object is the single "Source of Truth" for the app.
+ * If the data here changes, we call render() to update the screen.
+ */
 const state = {
-    flashCards: [],
-    currentIndex: 0,
-    isFlipped: false,
-    isLoading: true
+    flashCards: [],    // Array of objects containing card data
+    currentIndex: 0,   // Pointer to the card currently being viewed
+    isFlipped: false,  // Boolean: true = 'back', false = 'front'
+    isLoading: true    // Tracks if we are currently fetching data
 };
 
+/**
+ * SECTION 4: UI ELEMENTS (DOM CACHING)
+ * We select these once and store them in variables to keep the code clean.
+ */
+const flashCardDisplay = document.querySelector(".flashCard .content");
+const nextBtn = document.querySelector('.next-btn');
+const flipBtn = document.querySelector('.flip-btn');
+const saveBtn = document.querySelector('#save-btn');
+const frontInput = document.querySelector('#front-input');
+const backInput = document.querySelector('#back-input');
+
+/**
+ * SECTION 5: ASYNCHRONOUS LOGIC (The Cloud Dance)
+ */
+
+/**
+ * Fetches all card data from the 'words' collection in the cloud.
+ * @async
+ */
 async function fetchJsonData() {
     try {
-        console.log("Database object:", db);
-
-        // 1. Fetch from Firestore
+        // Step 1: Request data snapshot from Firestore
         const querySnapshot = await getDocs(collection(db, "words"));
 
-        // 2. Clear current list and fill with Firestore data
+        // Step 2: Clear local array and map cloud data into state
         state.flashCards = [];
         querySnapshot.forEach((doc) => {
-            // Combines the Firestore ID with the 'front' and 'back' data
+            // Using the 'spread operator' (...) to merge ID with card content
             state.flashCards.push({ id: doc.id, ...doc.data() });
         });
 
         console.log("Cards loaded into state:", state.flashCards.length);
 
-        // 3. Update the UI 
-        // IMPORTANT: render() must come BEFORE return
+        // Step 3: Draw the first card now that data is ready
         render();
 
-        // 4. Optionally return the data if you need it elsewhere
-        return state.flashCards;
-
     } catch (error) {
-        // Updated the error message to be more accurate for Firebase
         console.error("Firebase Fetch Error:", error);
     }
 }
 
-/*async function fetchJsonData() {
+/**
+ * Captures user input, sends a new card to the cloud, and updates local state.
+ * @async
+ */
+async function createNewCard() {
+    const frontText = frontInput.value;
+    const backText = backInput.value;
+
+    // Validation: Ensure user has entered text on both sides
+    if (!frontText || !backText) {
+        alert("Please fill out both sides!");
+        return;
+    }
+
     try {
-        // 1. Wait for the fetch request to complete
-        //const response = await fetch('./cards.json');
-        console.log("Database object:", db);
-        const querySnapshot = await getDocs(collection(db, "words"));
+        console.log("Sending card to cloud...");
 
-
-        // 2. Check if the file exists and is accessible
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        // 3. Use await to parse the JSON
-        //const data = await response.json()
-        //state.flashCards = data;
-        //state.isLoading = false;
-
-        state.flashCards = [];
-
-        querySnapshot.forEach((doc) => {
-            // doc.data() is the object containing 'front', 'back', 'difficulty', etc.
-            state.flashCards.push({ id: doc.id, ...doc.data() });
+        // Step 1: Persist card to Firestore
+        const docRef = await addDoc(collection(db, "words"), {
+            front: frontText,
+            back: backText,
+            createdAt: new Date()
         });
 
-        //return state.flashCards;
-        // 4. Draw the first card once data is ready
+        // Step 2: Perform an 'Optimistic Update' by adding the card to our local State
+        state.flashCards.push({
+            id: docRef.id,
+            front: frontText,
+            back: backText
+        });
 
+        // Step 3: Clear form and re-render the view
+        frontInput.value = "";
+        backInput.value = "";
         render();
 
-
-
     } catch (error) {
-        // Handle network errors or JSON syntax errors
-        console.error("Could not fetch the JSON file:", error);
+        console.error("Error adding card:", error);
     }
 }
-*/
-//The "Renderer" (The only place that touches the DOM)
+
+/**
+ * SECTION 6: THE RENDER ENGINE
+ * The only function responsible for updating the HTML.
+ */
 function render() {
-    // 1.set the 'currentCard variable to the first flash card from the json file
     const currentCard = state.flashCards[state.currentIndex];
 
-    // 2. Check if the current card has a value otherwise return 
+    // Safety check: Exit if the database is empty
     if (!currentCard) return;
 
-    // 3. Update text based on flip state
-    flashCard.textContent = state.isFlipped ? currentCard.back : currentCard.front;
-    debugState();
+    // Update text based on the flip state (Ternary operator: condition ? true : false)
+    flashCardDisplay.textContent = state.isFlipped ? currentCard.back : currentCard.front;
 
-    // Toggle a CSS class for the animation
-    //cardEl.classList.toggle('flipped', state.isFlipped);
+    debugState("UI Re-rendered");
 }
 
+/**
+ * SECTION 7: EVENT LISTENERS
+ * Linking user clicks to state changes.
+ */
 
-// 5. Event Listeners
 nextBtn.addEventListener('click', () => {
+    // Increment index, looping back to 0 at the end of the array using Modulo (%)
     state.currentIndex = (state.currentIndex + 1) % state.flashCards.length;
-    state.isFlipped = false; // Reset flip on next card
+    state.isFlipped = false; // Always show front of a new card
     render();
 });
 
@@ -146,21 +156,17 @@ flipBtn.addEventListener('click', () => {
     render();
 });
 
+saveBtn.addEventListener('click', createNewCard);
 
-//Adding in a Degbug function to check if the data is being fetched correctly
-
-const DEBUG_MODE = true; // Turn this to false when you're done!
-
+/**
+ * SECTION 8: DEBUGGING TOOL
+ * Provides a snapshot of the current application state in the console.
+ */
 function debugState(action) {
-    if (!DEBUG_MODE) return;
-
     console.group(`%cDebug: ${action}`, "color: #007bff; font-weight: bold;");
-    console.log("Current Index:", state.currentIndex);
-    console.log("Is Flipped:", state.isFlipped);
-    console.log("Total Cards:", state.flashCards.length);
-    console.log("Full State Object:", { ...state }); // The { ... } creates a snapshot
+    console.log("State:", state);
     console.groupEnd();
 }
 
-// Execute the function
+// BOOTSTRAP: Initial data load
 fetchJsonData();
