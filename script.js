@@ -45,7 +45,9 @@ const state = {
  * SECTION 4: UI ELEMENTS (DOM CACHING)
  * We select these once and store them in variables to keep the code clean.
  */
-const flashCardDisplay = document.querySelector(".flashCard .content");
+const flashCard = document.querySelector(".flashCard");
+const flashCardDisplayFront = document.querySelector(".flashCard .flashCard-front .front-content");
+const flashCardDisplayBack = document.querySelector(".flashCard .flashCard-back .back-content");
 const nextBtn = document.querySelector('.next-btn');
 const flipBtn = document.querySelector('.flip-btn');
 const saveBtn = document.querySelector('#save-btn');
@@ -134,10 +136,13 @@ function render() {
     if (!currentCard) return;
 
     // Update text based on the flip state (Ternary operator: condition ? true : false)
-    flashCardDisplay.textContent = state.isFlipped ? currentCard.back : currentCard.front;
+    flashCardDisplayFront.textContent = currentCard.front;
+    flashCardDisplayBack.textContent = currentCard.back;
+    currentCard.back;
 
     debugState("UI Re-rendered");
 }
+
 
 /**
  * SECTION 7: EVENT LISTENERS
@@ -154,6 +159,12 @@ nextBtn.addEventListener('click', () => {
 flipBtn.addEventListener('click', () => {
     state.isFlipped = !state.isFlipped;
     render();
+    // Check the state and add/remove the class accordingly
+    if (state.isFlipped) {
+        flashCard.classList.add('flipped');
+    } else {
+        flashCard.classList.remove('flipped');
+    }
 });
 
 saveBtn.addEventListener('click', createNewCard);
