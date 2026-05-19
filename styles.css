@@ -1,5 +1,63 @@
 /* Adding in the use of flexbox in order to center elements on the page  */
 
+
+/* 1. Default Light Mode Styles */
+/* 1. Default Light Mode Styles */
+:root {
+    --bg-color: #f4f4f5;
+    --text-color: #18181b;
+    --card-front-bg: #e4e4e7;
+    --card-back-bg: #27272a;
+    --card-back-text: #ffffff;
+    --btn-bg: #d4d4d8;
+    --btn-text: #18181b;
+    --shadow-color: rgba(0, 0, 0, 0.08);
+}
+
+/* 2. Dark Mode Overrides */
+[data-theme="dark"] {
+    --bg-color: #121212;
+    --text-color: #fafafa;
+    --card-front-bg: #1e1e1e;
+    --card-back-bg: #2d2d30;
+    --card-back-text: #fafafa;
+    --btn-bg: #27272a;
+    --btn-text: #e4e4e7;
+    --shadow-color: rgba(0, 0, 0, 0.4);
+}
+
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+    /* Smooth transition */
+}
+
+.flashCard-front {
+    background-color: var(--card-front-bg);
+    color: var(--text-color);
+    transform: rotateY(0deg);
+    z-index: 2;
+    /* Forces front on top initially */
+}
+
+.flashCard-back {
+    background-color: var(--card-back-bg);
+    color: var(--card-back-text);
+    /* 🌟 FIX: Combines the rotation with a 1px forward push in 3D space */
+    transform: rotateY(180deg) translateZ(1px);
+}
+
+button {
+    background-color: var(--btn-bg);
+    color: var(--btn-text);
+    border: 1px solid transparent;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+
+
 .top {
     display: flex;
     justify-content: center;
@@ -54,12 +112,12 @@
     gap: 10px;
 }
 
-.button {
+/*.button {
 
     height: 50px;
     width: 100px;
 }
-
+*/
 .flashCard-inner {
     position: relative;
     width: 100%;
@@ -70,8 +128,7 @@
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
 }
 
-.flashCard.flipped .flashCard-inner,
-.flashCard-inner.flipped {
+.flashCard.flipped .flashCard-inner {
     transform: rotateY(180deg);
 }
 
@@ -84,13 +141,14 @@
     backface-visibility: hidden;
 }
 
-.flashCard-front {
+/*.flashCard-front {
     background-color: beige;
     color: black
 }
-
-.flashCard-back {
+*/
+/*.flashCard-back {
     background-color: beige;
     color: black;
     transform: rotateY(180deg);
 }
+*/

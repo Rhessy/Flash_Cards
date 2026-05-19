@@ -38,7 +38,8 @@ const state = {
     flashCards: [],    // Array of objects containing card data
     currentIndex: 0,   // Pointer to the card currently being viewed
     isFlipped: false,  // Boolean: true = 'back', false = 'front'
-    isLoading: true    // Tracks if we are currently fetching data
+    isLoading: true,   // Tracks if we are currently fetching data
+    theme: 'light'     // Tracks the current theme
 };
 
 /**
@@ -53,6 +54,8 @@ const flipBtn = document.querySelector('.flip-btn');
 const saveBtn = document.querySelector('#save-btn');
 const frontInput = document.querySelector('#front-input');
 const backInput = document.querySelector('#back-input');
+const darkModeBtn = document.querySelector('#darkMode');
+const lightModeBtn = document.querySelector('#lightMode');
 
 /**
  * SECTION 5: ASYNCHRONOUS LOGIC (The Cloud Dance)
@@ -179,5 +182,28 @@ function debugState(action) {
     console.groupEnd();
 }
 
+
+const themeBtn = document.querySelector('.theme-toggle-btn');
+
+themeBtn.addEventListener('click', () => {
+    // 1. Toggle the state string
+    state.theme = (state.theme === 'light') ? 'dark' : 'light';
+
+    // 2. Apply the data attribute directly to the <body> tag
+    document.body.setAttribute('data-theme', state.theme);
+
+    // 3. Update the toggle button icon/text text dynamically
+    if (state.theme === 'dark') {
+        themeBtn.textContent = "☀️ Light Mode";
+    } else {
+        themeBtn.textContent = "🌙 Dark Mode";
+    }
+
+    debugState("Theme Toggle");
+});
+
+
 // BOOTSTRAP: Initial data load
 fetchJsonData();
+
+
